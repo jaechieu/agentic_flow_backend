@@ -1,0 +1,40 @@
+search tool can extract relevant info from subquery by chunking the source, using vector search to get first N results
+
+Key takeaways
+1. langgraph is different from langchain in that it is more suited for agentic flows
+
+2. langgraph implements agentic flows by having nodes represent agents and functions, edges represent paths between nodes, and conditional edges to represent conditional flows to terminate or take alternative paths in the graph
+
+3. langgraph's have agent state which is an object that contains information on the agent from all points in time per the definition the developer creates
+
+4. the runtime, which is the code surrounding an agent, is responsible for jobs like tool use and flows
+
+5. ReAct stands for reasoning + acting
+
+6. Persistence is the ability for an agent to maintain state across time, especially if a task is long. 
+
+7. agentic search is one use case where an agent can do a parse on the internet as opposed to using beautifulsoup and html parsing
+
+8. Think, act, pause, observe is a common flow for agents to take. Pause is important because it allows the runtime the ability to intervene and give the agent information to observe whether or not their action completes the task.
+
+9. The course accomplishes persistence using SqliteSaver, an in-memory store, in persistance_and_streaming.py
+
+10. persistence and streaming demonstrates using thread_ids which is useful for prod
+
+11. async methods on graph are enabled in persistance and streaming by using async checkpointers
+
+12. to implement human in the loop, instead of doing operator.add which appends messages, we now need the ability to replace messages using a message reducer function. It still appends otherwise
+
+13. thread configs are stored within the checkpointer
+
+14. as a graph is executing, a snapshot of each state is stored in memory. Included is agent state, thread, unique id for each snapshot called thread_ts
+
+15. you can use unique identifiers for a snapshot to have a graph begin at a particular point, the guy calls "time travel"
+
+16. to modify/correct an agent action, you can go into tool calls and update that value. then you call graph.update_state()
+
+17. multi agent architectures is one where there are multiple agents passing state around
+
+18. supervisor architecture is one where a supervisor agent routes and coordinates other agents, but does not pass state around
+
+19. thought: having a composable architecture where the LLM itself chooses the architecture as needed? like where loops happen and such
