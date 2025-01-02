@@ -1,0 +1,8 @@
+{
+  "requestContext": {
+    "http": {
+      "method": "GET"
+    }
+  },
+  "isBase64Encoded": false
+}

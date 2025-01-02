@@ -1,0 +1,734 @@
+Resources:
+  PythonLambdaTestServiceRole1376B9A7:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+    Metadata:
+      aws:cdk:path: CloudInfraStack/PythonLambdaTest/ServiceRole/Resource
+  PythonLambdaTestServiceRoleDefaultPolicy0DF0DAE9:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action: s3:GetObject
+            Effect: Allow
+            Resource: arn:aws:s3:::example-bucket/*
+        Version: "2012-10-17"
+      PolicyName: PythonLambdaTestServiceRoleDefaultPolicy0DF0DAE9
+      Roles:
+        - Ref: PythonLambdaTestServiceRole1376B9A7
+    Metadata:
+      aws:cdk:path: CloudInfraStack/PythonLambdaTest/ServiceRole/DefaultPolicy/Resource
+  PythonLambdaTestE942836C:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket:
+          Fn::Sub: cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}
+        S3Key: 1ea9a38fe12234a73dbed411b204b066a3da157cb94299a41a5c85b50ecb88c3.zip
+      Environment:
+        Variables:
+          HELLO: World
+          ENV: local
+      Handler: index.lambda_handler
+      Role:
+        Fn::GetAtt:
+          - PythonLambdaTestServiceRole1376B9A7
+          - Arn
+      Runtime: python3.11
+    DependsOn:
+      - PythonLambdaTestServiceRoleDefaultPolicy0DF0DAE9
+      - PythonLambdaTestServiceRole1376B9A7
+    Metadata:
+      aws:cdk:path: CloudInfraStack/PythonLambdaTest/Resource
+      aws:asset:path: asset.1ea9a38fe12234a73dbed411b204b066a3da157cb94299a41a5c85b50ecb88c3
+      aws:asset:is-bundled: true
+      aws:asset:property: Code
+  PythonLambdaApi0662BEAD:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Description: API Gateway for Python Lambda
+      Name: Python Lambda API
+    Metadata:
+      aws:cdk:path: CloudInfraStack/PythonLambdaApi/Resource
+  PythonLambdaApiDeployment16D73F2756831fc98bff3330d0d49e271e08ed60:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      Description: API Gateway for Python Lambda
+      RestApiId:
+        Ref: PythonLambdaApi0662BEAD
+    DependsOn:
+      - PythonLambdaApiproxyOPTIONS8CF18468
+      - PythonLambdaApiproxyD7952620
+      - PythonLambdaApiGET828F6114
+      - PythonLambdaApiitemsGET711331F9
+      - PythonLambdaApiitemsPOST200D4093
+      - PythonLambdaApiitems728191E5
+      - PythonLambdaApiOPTIONSBA69873E
+      - PythonLambdaApiordersPOST7C43926F
+      - PythonLambdaApiorders766CDE31
+      - PythonLambdaApiPOSTD0A431D9
+    Metadata:
+      aws:cdk:path: CloudInfraStack/PythonLambdaApi/Deployment/Resource
+  PythonLambdaApiDeploymentStageprodF575CF16:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      DeploymentId:
+        Ref: PythonLambdaApiDeployment16D73F2756831fc98bff3330d0d49e271e08ed60
+      RestApiId:
+        Ref: PythonLambdaApi0662BEAD
+      StageName: prod
+    Metadata:
+      aws:cdk:path: CloudInfraStack/PythonLambdaApi/DeploymentStage.prod/Resource
+  PythonLambdaApiGETApiPermissionCloudInfraStackPythonLambdaApiB77DE22FGET09AF39DE:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+          - PythonLambdaTestE942836C
+          - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Join:
+          - ""
+          - - "arn:"
+            - Ref: AWS::Partition
+            - ":execute-api:"
+            - Ref: AWS::Region
+            - ":"
+            - Ref: AWS::AccountId
+            - ":"
+            - Ref: PythonLambdaApi0662BEAD
+            - /
+            - Ref: PythonLambdaApiDeploymentStageprodF575CF16
+            - /GET/
+    Metadata:
+      aws:cdk:path: CloudInfraStack/PythonLambdaApi/Default/GET/ApiPermission.CloudInfraStackPythonLambdaApiB77DE22F.GET..
+  PythonLambdaApiGETApiPermissionTestCloudInfraStackPythonLambdaApiB77DE22FGET297B8F6B:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+          - PythonLambdaTestE942836C
+          - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Join:
+          - ""
+          - - "arn:"
+            - Ref: AWS::Partition
+            - ":execute-api:"
+            - Ref: AWS::Region
+            - ":"
+            - Ref: AWS::AccountId
+            - ":"
+            - Ref: PythonLambdaApi0662BEAD
+            - /test-invoke-stage/GET/
+    Metadata:
+      aws:cdk:path: CloudInfraStack/PythonLambdaApi/Default/GET/ApiPermission.Test.CloudInfraStackPythonLambdaApiB77DE22F.GET..
+  PythonLambdaApiGET828F6114:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: GET
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri:
+          Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - ":apigateway:"
+              - Ref: AWS::Region
+              - :lambda:path/2015-03-31/functions/
+              - Fn::GetAtt:
+                  - PythonLambdaTestE942836C
+                  - Arn
+              - /invocations
+      ResourceId:
+        Fn::GetAtt:
+          - PythonLambdaApi0662BEAD
+          - RootResourceId
+      RestApiId:
+        Ref: PythonLambdaApi0662BEAD
+    Metadata:
+      aws:cdk:path: CloudInfraStack/PythonLambdaApi/Default/GET/Resource
+  PythonLambdaApiPOSTApiPermissionCloudInfraStackPythonLambdaApiB77DE22FPOST7B02A14F:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+          - PythonLambdaTestE942836C
+          - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Join:
+          - ""
+          - - "arn:"
+            - Ref: AWS::Partition
+            - ":execute-api:"
+            - Ref: AWS::Region
+            - ":"
+            - Ref: AWS::AccountId
+            - ":"
+            - Ref: PythonLambdaApi0662BEAD
+            - /
+            - Ref: PythonLambdaApiDeploymentStageprodF575CF16
+            - /POST/
+    Metadata:
+      aws:cdk:path: CloudInfraStack/PythonLambdaApi/Default/POST/ApiPermission.CloudInfraStackPythonLambdaApiB77DE22F.POST..
+  PythonLambdaApiPOSTApiPermissionTestCloudInfraStackPythonLambdaApiB77DE22FPOSTAB0ABCBC:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+          - PythonLambdaTestE942836C
+          - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Join:
+          - ""
+          - - "arn:"
+            - Ref: AWS::Partition
+            - ":execute-api:"
+            - Ref: AWS::Region
+            - ":"
+            - Ref: AWS::AccountId
+            - ":"
+            - Ref: PythonLambdaApi0662BEAD
+            - /test-invoke-stage/POST/
+    Metadata:
+      aws:cdk:path: CloudInfraStack/PythonLambdaApi/Default/POST/ApiPermission.Test.CloudInfraStackPythonLambdaApiB77DE22F.POST..
+  PythonLambdaApiPOSTD0A431D9:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: POST
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri:
+          Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - ":apigateway:"
+              - Ref: AWS::Region
+              - :lambda:path/2015-03-31/functions/
+              - Fn::GetAtt:
+                  - PythonLambdaTestE942836C
+                  - Arn
+              - /invocations
+      ResourceId:
+        Fn::GetAtt:
+          - PythonLambdaApi0662BEAD
+          - RootResourceId
+      RestApiId:
+        Ref: PythonLambdaApi0662BEAD
+    Metadata:
+      aws:cdk:path: CloudInfraStack/PythonLambdaApi/Default/POST/Resource
+  PythonLambdaApiitems728191E5:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId:
+        Fn::GetAtt:
+          - PythonLambdaApi0662BEAD
+          - RootResourceId
+      PathPart: items
+      RestApiId:
+        Ref: PythonLambdaApi0662BEAD
+    Metadata:
+      aws:cdk:path: CloudInfraStack/PythonLambdaApi/Default/items/Resource
+  PythonLambdaApiitemsGETApiPermissionCloudInfraStackPythonLambdaApiB77DE22FGETitems78681B65:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+          - PythonLambdaTestE942836C
+          - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Join:
+          - ""
+          - - "arn:"
+            - Ref: AWS::Partition
+            - ":execute-api:"
+            - Ref: AWS::Region
+            - ":"
+            - Ref: AWS::AccountId
+            - ":"
+            - Ref: PythonLambdaApi0662BEAD
+            - /
+            - Ref: PythonLambdaApiDeploymentStageprodF575CF16
+            - /GET/items
+    Metadata:
+      aws:cdk:path: CloudInfraStack/PythonLambdaApi/Default/items/GET/ApiPermission.CloudInfraStackPythonLambdaApiB77DE22F.GET..items
+  PythonLambdaApiitemsGETApiPermissionTestCloudInfraStackPythonLambdaApiB77DE22FGETitems0307F67C:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+          - PythonLambdaTestE942836C
+          - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Join:
+          - ""
+          - - "arn:"
+            - Ref: AWS::Partition
+            - ":execute-api:"
+            - Ref: AWS::Region
+            - ":"
+            - Ref: AWS::AccountId
+            - ":"
+            - Ref: PythonLambdaApi0662BEAD
+            - /test-invoke-stage/GET/items
+    Metadata:
+      aws:cdk:path: CloudInfraStack/PythonLambdaApi/Default/items/GET/ApiPermission.Test.CloudInfraStackPythonLambdaApiB77DE22F.GET..items
+  PythonLambdaApiitemsGET711331F9:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: GET
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri:
+          Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - ":apigateway:"
+              - Ref: AWS::Region
+              - :lambda:path/2015-03-31/functions/
+              - Fn::GetAtt:
+                  - PythonLambdaTestE942836C
+                  - Arn
+              - /invocations
+      ResourceId:
+        Ref: PythonLambdaApiitems728191E5
+      RestApiId:
+        Ref: PythonLambdaApi0662BEAD
+    Metadata:
+      aws:cdk:path: CloudInfraStack/PythonLambdaApi/Default/items/GET/Resource
+  PythonLambdaApiitemsPOSTApiPermissionCloudInfraStackPythonLambdaApiB77DE22FPOSTitemsF56364B0:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+          - PythonLambdaTestE942836C
+          - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Join:
+          - ""
+          - - "arn:"
+            - Ref: AWS::Partition
+            - ":execute-api:"
+            - Ref: AWS::Region
+            - ":"
+            - Ref: AWS::AccountId
+            - ":"
+            - Ref: PythonLambdaApi0662BEAD
+            - /
+            - Ref: PythonLambdaApiDeploymentStageprodF575CF16
+            - /POST/items
+    Metadata:
+      aws:cdk:path: CloudInfraStack/PythonLambdaApi/Default/items/POST/ApiPermission.CloudInfraStackPythonLambdaApiB77DE22F.POST..items
+  PythonLambdaApiitemsPOSTApiPermissionTestCloudInfraStackPythonLambdaApiB77DE22FPOSTitems0D8809F9:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+          - PythonLambdaTestE942836C
+          - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Join:
+          - ""
+          - - "arn:"
+            - Ref: AWS::Partition
+            - ":execute-api:"
+            - Ref: AWS::Region
+            - ":"
+            - Ref: AWS::AccountId
+            - ":"
+            - Ref: PythonLambdaApi0662BEAD
+            - /test-invoke-stage/POST/items
+    Metadata:
+      aws:cdk:path: CloudInfraStack/PythonLambdaApi/Default/items/POST/ApiPermission.Test.CloudInfraStackPythonLambdaApiB77DE22F.POST..items
+  PythonLambdaApiitemsPOST200D4093:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: POST
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri:
+          Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - ":apigateway:"
+              - Ref: AWS::Region
+              - :lambda:path/2015-03-31/functions/
+              - Fn::GetAtt:
+                  - PythonLambdaTestE942836C
+                  - Arn
+              - /invocations
+      ResourceId:
+        Ref: PythonLambdaApiitems728191E5
+      RestApiId:
+        Ref: PythonLambdaApi0662BEAD
+    Metadata:
+      aws:cdk:path: CloudInfraStack/PythonLambdaApi/Default/items/POST/Resource
+  PythonLambdaApiorders766CDE31:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId:
+        Fn::GetAtt:
+          - PythonLambdaApi0662BEAD
+          - RootResourceId
+      PathPart: orders
+      RestApiId:
+        Ref: PythonLambdaApi0662BEAD
+    Metadata:
+      aws:cdk:path: CloudInfraStack/PythonLambdaApi/Default/orders/Resource
+  PythonLambdaApiordersPOSTApiPermissionCloudInfraStackPythonLambdaApiB77DE22FPOSTordersD237AF46:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+          - PythonLambdaTestE942836C
+          - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Join:
+          - ""
+          - - "arn:"
+            - Ref: AWS::Partition
+            - ":execute-api:"
+            - Ref: AWS::Region
+            - ":"
+            - Ref: AWS::AccountId
+            - ":"
+            - Ref: PythonLambdaApi0662BEAD
+            - /
+            - Ref: PythonLambdaApiDeploymentStageprodF575CF16
+            - /POST/orders
+    Metadata:
+      aws:cdk:path: CloudInfraStack/PythonLambdaApi/Default/orders/POST/ApiPermission.CloudInfraStackPythonLambdaApiB77DE22F.POST..orders
+  PythonLambdaApiordersPOSTApiPermissionTestCloudInfraStackPythonLambdaApiB77DE22FPOSTorders902350D4:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+          - PythonLambdaTestE942836C
+          - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Join:
+          - ""
+          - - "arn:"
+            - Ref: AWS::Partition
+            - ":execute-api:"
+            - Ref: AWS::Region
+            - ":"
+            - Ref: AWS::AccountId
+            - ":"
+            - Ref: PythonLambdaApi0662BEAD
+            - /test-invoke-stage/POST/orders
+    Metadata:
+      aws:cdk:path: CloudInfraStack/PythonLambdaApi/Default/orders/POST/ApiPermission.Test.CloudInfraStackPythonLambdaApiB77DE22F.POST..orders
+  PythonLambdaApiordersPOST7C43926F:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: POST
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri:
+          Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - ":apigateway:"
+              - Ref: AWS::Region
+              - :lambda:path/2015-03-31/functions/
+              - Fn::GetAtt:
+                  - PythonLambdaTestE942836C
+                  - Arn
+              - /invocations
+      ResourceId:
+        Ref: PythonLambdaApiorders766CDE31
+      RestApiId:
+        Ref: PythonLambdaApi0662BEAD
+    Metadata:
+      aws:cdk:path: CloudInfraStack/PythonLambdaApi/Default/orders/POST/Resource
+  PythonLambdaApiOPTIONSApiPermissionCloudInfraStackPythonLambdaApiB77DE22FOPTIONS387696D0:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+          - PythonLambdaTestE942836C
+          - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Join:
+          - ""
+          - - "arn:"
+            - Ref: AWS::Partition
+            - ":execute-api:"
+            - Ref: AWS::Region
+            - ":"
+            - Ref: AWS::AccountId
+            - ":"
+            - Ref: PythonLambdaApi0662BEAD
+            - /
+            - Ref: PythonLambdaApiDeploymentStageprodF575CF16
+            - /OPTIONS/
+    Metadata:
+      aws:cdk:path: CloudInfraStack/PythonLambdaApi/Default/OPTIONS/ApiPermission.CloudInfraStackPythonLambdaApiB77DE22F.OPTIONS..
+  PythonLambdaApiOPTIONSApiPermissionTestCloudInfraStackPythonLambdaApiB77DE22FOPTIONS0C994306:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+          - PythonLambdaTestE942836C
+          - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Join:
+          - ""
+          - - "arn:"
+            - Ref: AWS::Partition
+            - ":execute-api:"
+            - Ref: AWS::Region
+            - ":"
+            - Ref: AWS::AccountId
+            - ":"
+            - Ref: PythonLambdaApi0662BEAD
+            - /test-invoke-stage/OPTIONS/
+    Metadata:
+      aws:cdk:path: CloudInfraStack/PythonLambdaApi/Default/OPTIONS/ApiPermission.Test.CloudInfraStackPythonLambdaApiB77DE22F.OPTIONS..
+  PythonLambdaApiOPTIONSBA69873E:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: OPTIONS
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri:
+          Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - ":apigateway:"
+              - Ref: AWS::Region
+              - :lambda:path/2015-03-31/functions/
+              - Fn::GetAtt:
+                  - PythonLambdaTestE942836C
+                  - Arn
+              - /invocations
+      ResourceId:
+        Fn::GetAtt:
+          - PythonLambdaApi0662BEAD
+          - RootResourceId
+      RestApiId:
+        Ref: PythonLambdaApi0662BEAD
+    Metadata:
+      aws:cdk:path: CloudInfraStack/PythonLambdaApi/Default/OPTIONS/Resource
+  PythonLambdaApiproxyD7952620:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId:
+        Fn::GetAtt:
+          - PythonLambdaApi0662BEAD
+          - RootResourceId
+      PathPart: "{proxy+}"
+      RestApiId:
+        Ref: PythonLambdaApi0662BEAD
+    Metadata:
+      aws:cdk:path: CloudInfraStack/PythonLambdaApi/Default/{proxy+}/Resource
+  PythonLambdaApiproxyOPTIONS8CF18468:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ApiKeyRequired: false
+      AuthorizationType: NONE
+      HttpMethod: OPTIONS
+      Integration:
+        IntegrationResponses:
+          - ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Access-Control-Allow-Methods: "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+            StatusCode: "204"
+        RequestTemplates:
+          application/json: "{ statusCode: 200 }"
+        Type: MOCK
+      MethodResponses:
+        - ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Origin: true
+            method.response.header.Access-Control-Allow-Methods: true
+          StatusCode: "204"
+      ResourceId:
+        Ref: PythonLambdaApiproxyD7952620
+      RestApiId:
+        Ref: PythonLambdaApi0662BEAD
+    Metadata:
+      aws:cdk:path: CloudInfraStack/PythonLambdaApi/Default/{proxy+}/OPTIONS/Resource
+  CDKMetadata:
+    Type: AWS::CDK::Metadata
+    Properties:
+      Analytics: v2:deflate64:H4sIAAAAAAAA/01Qy26DQAz8Fu6L80BVr01S9VY1Ih8QOeAkDssuwqYIIf692oWoOc2MPWuPdwub9wzGLMFe0qKsUssXGE+KRWWwl/PIWMOYe0vmcHURj95yMQQ5s8lIdkYRUoFdACMZ7LuiIt2jkLFYX0qE8XB1X50rlL2Lj6mtWYS9mww2fEOlHgcYcxLdNRzXLfSTGuuHmpyG6os6Kd5isJnkJL5rC4prv0nvvgzNhT27y+TIp+m/HLOHQexuwfPTadPpqzvwg3cla0ydpWibO8I6+Vh+bxVwvjdtBr17t1iOUTzPn4zzJcFDVr/bNWzeYJM8hDltO6dcE+Qz/gGmOfRgnAEAAA==
+    Metadata:
+      aws:cdk:path: CloudInfraStack/CDKMetadata/Default
+    Condition: CDKMetadataAvailable
+Outputs:
+  PythonLambdaApiEndpointB3F0BBF8:
+    Value:
+      Fn::Join:
+        - ""
+        - - https://
+          - Ref: PythonLambdaApi0662BEAD
+          - .execute-api.
+          - Ref: AWS::Region
+          - "."
+          - Ref: AWS::URLSuffix
+          - /
+          - Ref: PythonLambdaApiDeploymentStageprodF575CF16
+          - /
+Conditions:
+  CDKMetadataAvailable:
+    Fn::Or:
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - af-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-northeast-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-northeast-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-northeast-3
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-south-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-3
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-4
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ca-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ca-west-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - cn-north-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - cn-northwest-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-central-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-north-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-south-2
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-3
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - il-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - me-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - me-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - sa-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-east-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-west-1
+      - Fn::Equals:
+          - Ref: AWS::Region
+          - us-west-2
+Parameters:
+  BootstrapVersion:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /cdk-bootstrap/hnb659fds/version
+    Description: Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]
+

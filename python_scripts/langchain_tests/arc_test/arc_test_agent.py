@@ -1,5 +1,5 @@
 from langgraph.graph import StateGraph, END
-from typing import TypedDict, Annotated
+from typing import TypedDict, Annotated, List
 import operator
 from langchain_core.messages import AnyMessage, SystemMessage, HumanMessage, ToolMessage
 from langchain_openai import ChatOpenAI
@@ -10,7 +10,7 @@ tool = TavilySearchResults(max_results=4)  # increased number of results
 
 
 class AgentState(TypedDict):
-    messages: Annotated[list[AnyMessage], operator.add]
+    messages: List[AnyMessage]  # Simplified version without annotation
 
 
 class Agent:
